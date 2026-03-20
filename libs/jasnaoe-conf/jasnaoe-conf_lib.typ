@@ -61,7 +61,7 @@
       // We don't want to number of the acknowledgment section.
       #v(9pt)
       #set par(first-line-indent: 0pt)
-      #let is-ack = it.body in ([謝辞], [謝　辞], [謝　　辞], [Acknowledgement])
+      #let is-ack = it.body in ([謝辞], [謝　辞], [謝　　辞], [Acknowledgements])
       #set align(center)
       #set text(size: 10pt, font: gothic, weight: "bold")
       // #v(9pt, weak: true)
