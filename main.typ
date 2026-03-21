@@ -1,22 +1,58 @@
+#let meta = yaml("paper_info.yaml")
+// -----------------------------------------
+// Top page
+#set page(paper: "a4", columns: 1, margin: (top: 25mm, bottom: 22mm, x: 20mm))
+#set text(size: 10pt)
+
+#v(15mm)
+#text(size: 16pt, weight: "bold")[#meta.title]
+#v(10mm)
+
+#let affiliations = {
+  let list = ()
+  for a in meta.authors {
+    let affs = if type(a.affiliation) == array { a.affiliation } else { (a.affiliation,) }
+    for aff in affs {
+      if list.position(x => x == aff) == none {
+        list.push(aff)
+      }
+    }
+  }
+  list
+}
+
+#for (idx, a) in meta.authors.enumerate() [
+  #let affs = if type(a.affiliation) == array { a.affiliation } else { (a.affiliation,) }
+  #let nums = affs.map(aff => affiliations.position(x => x == aff) + 1)
+  #let nums-text = nums.map(n => str(n)).join(",")
+
+  #a.name#super[#nums-text]
+  #if idx < meta.authors.len() - 1 [
+    #h(1.0em)
+  ]
+]
+
+
+#v(4mm)
+#for (i, aff) in affiliations.enumerate() [
+  #super[#(i + 1)] #aff
+  #linebreak()
+]
+
+#v(12mm)
+#text(weight: "bold")[Abstract]
+#v(4mm)
+#align(left)[#meta.abstract]
+
+#pagebreak()
+
+//------------------------------------------
+
 #import "libs/jasnaoe-conf/jasnaoe-conf_lib.typ": jasnaoe-conf
 #show: jasnaoe-conf.with()
 
 #import "libs/jasnaoe-conf/direct_bib_lib.typ": bibliography-list, bib-item, use-bib-item-ref
 #show: use-bib-item-ref.with(numbering: "1)") // 番号の書式を指定
-
-//----------------------------------------
-/*
-Paper Title: Environmental Field Reconstruction for Ship Maneuvering via Uncertainty-Aware Inverse Estimation and Model Predictive Control
-
-Abstract:
-This study proposes an environmental field reconstruction framework for ship maneuvering based on uncertainty-aware inverse estimation using model predictive control (MPC). Unlike conventional approaches that treat wind and wave effects as disturbances, the proposed method explicitly reconstructs them as spatially distributed external force fields from observed ship motion.
-Hydrodynamic maneuvering coefficients are first identified from calm-water data using a Markov Chain Monte Carlo (MCMC) approach, yielding a posterior distribution that captures model uncertainty. Multiple maneuvering models are then generated from this distribution. External forces are estimated by formulating an MPC problem in which these forces are treated as control inputs, minimizing the discrepancy between measured and predicted trajectories over a finite horizon.
-To account for model uncertainty, force estimation is performed across multiple models, and a representative force is extracted from the resulting distribution. The environmental field is then reconstructed by mapping these estimated forces to vessel positions.
-The proposed method is validated using both simulation data with known ground truth and free-running model test data under wave conditions. The results demonstrate that the method can reconstruct physically consistent environmental fields when predictive models are sufficiently accurate, and that representative estimation enables robust inference under increased uncertainty. However, the estimation accuracy depends on model generalization, and structural limitations, such as neglecting roll motion, lead to degraded performance under certain wave conditions.
-The proposed framework provides a practical and data-driven approach for environmental effect estimation in ship maneuvering and highlights the importance of model structure and uncertainty handling.
-*/
-//----------------------------------------
-
 
 = Introduction
 
