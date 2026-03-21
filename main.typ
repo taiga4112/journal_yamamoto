@@ -181,7 +181,7 @@ The optimal external forces are obtained by minimizing the cost function, and th
 
 In real operations, ship dynamics vary depending on loading conditions and operating environments.
 Therefore, the proposed method employs models identified from observational data as predictive models.
-The identification is performed using the MCMC-based probabilistic system identification method  ddddd#super[@mitsuyuki_mmg_2024] described in the previous section, yielding multiple sets of hydrodynamic maneuvering coefficients representing model uncertainty.
+The identification is performed using the MCMC-based probabilistic system identification method#super[@mitsuyuki_mmg_2024] described in the previous section, yielding multiple sets of hydrodynamic maneuvering coefficients representing model uncertainty.
 
 To account for model uncertainty, multiple predictive models with different hydrodynamic maneuvering coefficient sets are prepared, and external force estimation using MPC is performed for each model.
 This approach yields multiple time-series estimates of external forces reflecting model uncertainty.
@@ -309,6 +309,7 @@ However, these methods process each component independently and may destroy the 
 
 To address this issue, the proposed method treats the three force components as a single vector and selects one of the estimated force vectors that is closest to the center of the distribution in terms of pairwise distances.
 This can be interpreted as a robust estimation of a representative point in a multidimensional space, analogous to the concept of a medoid.
+This ensures that the selected force vector corresponds to a physically realizable estimate among candidates.
 
 Each component is normalized to ensure comparable scaling among the force components, for example by dividing by characteristic magnitudes.
 Specifically, for the $i$-th normalized force vector at time $t$
