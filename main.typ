@@ -6,47 +6,48 @@
 
 //----------------------------------------
 /*
-Paper Title: Environmental Field Reconstruction for Ship Maneuvering Using Uncertainty-Aware Inverse Estimation with Model Predictive Control
+Paper Title: Environmental Field Reconstruction for Ship Maneuvering via Uncertainty-Aware Inverse Estimation and Model Predictive Control
 
 Abstract:
 This study proposes an environmental field reconstruction framework for ship maneuvering based on uncertainty-aware inverse estimation using model predictive control (MPC). Unlike conventional approaches that treat wind and wave effects as disturbances, the proposed method explicitly reconstructs them as spatially distributed external force fields from observed ship motion.
-Hydrodynamic derivatives are first identified from calm-water data using a Markov Chain Monte Carlo (MCMC) approach, yielding a posterior distribution that captures model uncertainty. Multiple maneuvering models are then generated from this distribution. External forces are estimated by formulating MPC with these forces treated as control inputs, minimizing the discrepancy between measured and predicted trajectories over a finite horizon.
+Hydrodynamic maneuvering coefficients are first identified from calm-water data using a Markov Chain Monte Carlo (MCMC) approach, yielding a posterior distribution that captures model uncertainty. Multiple maneuvering models are then generated from this distribution. External forces are estimated by formulating an MPC problem in which these forces are treated as control inputs, minimizing the discrepancy between measured and predicted trajectories over a finite horizon.
 To account for model uncertainty, force estimation is performed across multiple models, and a representative force is extracted from the resulting distribution. The environmental field is then reconstructed by mapping these estimated forces to vessel positions.
-The proposed method is validated using both simulation data with known ground truth and free-running model test data under wave conditions. The results demonstrate that the method can reconstruct environmental fields when predictive models are sufficiently accurate, and that representative estimation enables robust inference even under increased uncertainty. However, estimation accuracy depends on model generalization, and structural limitations such as neglecting roll motion lead to degraded performance under certain wave conditions.
-The proposed framework provides a data-driven approach for environmental effect estimation in ship maneuvering and highlights the importance of model structure and uncertainty handling.
+The proposed method is validated using both simulation data with known ground truth and free-running model test data under wave conditions. The results demonstrate that the method can reconstruct physically consistent environmental fields when predictive models are sufficiently accurate, and that representative estimation enables robust inference under increased uncertainty. However, the estimation accuracy depends on model generalization, and structural limitations, such as neglecting roll motion, lead to degraded performance under certain wave conditions.
+The proposed framework provides a practical and data-driven approach for environmental effect estimation in ship maneuvering and highlights the importance of model structure and uncertainty handling.
 */
 //----------------------------------------
 
 
 = Introduction
 
-In the maritime industry, approximately 80% of marine accidents are attributed to human factors, while additional challenges such as crew shortages and aging populations persist.
-To address these issues, extensive research and development efforts have been devoted to the realization of autonomous ships #super[@kim_autonomous_2020 @burmeister_autonomous_2014 @li_risk_2023 @he_quantitative_2017 @statheros_autonomous_2008 @felski_ocean-going_2020].
+In the maritime industry, it has been widely recognized that approximately 80% of marine accidents are attributed to human factors.
+At the same time, structural challenges, including crew shortages and an aging workforce, remain significant and persistent issues.
+To address these issues, extensive research and development efforts have been devoted to the realization of autonomous ships #super[@burmeister_autonomous_2014 @felski_ocean-going_2020].
 Autonomous ships are required to execute advanced maneuvering tasks, such as trajectory tracking and collision avoidance, which have traditionally been performed by human operators.
 Achieving this capability requires not only advanced control strategies but also an accurate understanding of ship maneuvering performance from the design stage.
 Therefore, ship maneuvering models play a fundamental role in both motion prediction and control.
 
-Ship maneuvering models have been widely used for trajectory prediction and control, and various modeling approaches have been developed #super[@yasukawaIntroductionMMGStandard2015 @liu_predictions_2018].
+Ship maneuvering models have been widely used for trajectory prediction and control, and various modeling approaches have been developed #super[@hao_recurrent_2022 @liu_predictions_2018 @wang_non-parameterized_2023].
 However, these models primarily describe ship behavior in calm water and do not fully capture environmental disturbances in real sea conditions.
 
-Conventionally, ship maneuvering models have been identified through PMM (Planar Motion Mechanism) tests, captive model tests (CMT), or computational fluid dynamics (CFD) analyses #super[@kume_measurements_2006 @ueno_circular_2009 @hao_recurrent_2022 @wang_non-parameterized_2023].
-These approaches enable highly accurate identification of hydrodynamic coefficients under specific operating conditions.
+Conventionally, ship maneuvering models have been identified through PMM (Planar Motion Mechanism) tests #super[@ZHU2022103327], captive model tests (CMT) #super[@ueno_circular_2009], or computational fluid dynamics (CFD) analyses #super[@kume_measurements_2006].
+These approaches enable highly accurate identification of hydrodynamic maneuvering coefficients under specific operating conditions.
 However, in actual operations, ship conditions vary due to factors such as loading conditions, ballast changes, and operational environments, leading to variations in hydrodynamic parameters.
-Data-driven identification methods using onboard observations have been proposed to address this issue, but the identified models inevitably include uncertainty due to measurement noise and data limitations #super[@mitsuyuki_mmg_2024].
+Data-driven identification methods using onboard observations have been proposed to address this issue #super[@hasan_discovering_2025 @REN2023109422], but the identified models inevitably include uncertainty due to measurement noise and data limitations #super[@mitsuyuki_mmg_2024].
 
-In real sea conditions, environmental disturbances such as wind and waves play a dominant role in ship motion.
+In real sea conditions, environmental factors such as wind, waves and currents play a dominant role in ship motion.
 Although these effects are typically treated as disturbances, they are not merely noise but phenomena with temporal and spatial structures.
-In conventional maneuvering models such as the MMG model, environmental effects are commonly represented as additional external force terms superimposed on calm-water dynamics #super[@yasukawa_application_2020 @suzuki_numerical_2021 @yasukawa_evaluations_2019 @paroka_prediction_2017].
-These external forces are usually estimated deductively using environmental information such as wind speed, wind direction, wave direction, and wavelength.
+In conventional maneuvering models such as the MMG model #super[@yasukawaIntroductionMMGStandard2015], Fossen model #super[@fossen_nonlinear_1995 @fossen_handbook_2011] and Abkowitz model #super[@abkowitz_measurement_1980], environmental effects are commonly represented as additional external force terms superimposed on calm-water dynamics #super[@yasukawa_application_2020 @suzuki_numerical_2021 @yasukawa_evaluations_2019 @paroka_prediction_2017].
+These external forces are usually estimated deductively using environmental information such as wind, waves and currents.
 However, even with wave buoys or satellite observations, it remains difficult to obtain accurate, real-time, and local environmental information along a ship’s trajectory.
 Furthermore, disturbance models derived from model-scale experiments inherently contain modeling errors and cannot fully represent the complexity of real sea environments.
-As a result, discrepancies arise between simulated ship motions and observed behaviors in waves.
-These discrepancies are not solely due to model errors but are also attributed to the uncertainty in the representation and estimation of environmental forces.
+As a result, discrepancies arise between simulated ship motions and observed behaviors.
+These discrepancies are not solely due to model errors but are also attributed to the uncertainty in the representation and estimation of environmental forces, highlighting the limitation of conventional forward modeling approaches in real sea conditions.
 
-On the other hand, recent advances in onboard measurement technologies such as GPS and voyage data recorders (VDR) have enabled the acquisition of abundant observational data, including ship position and velocity #super[@vu_estimating_2023 @mei_full-scale_2020].
-Although these observations include measurement uncertainty, they directly reflect the actual ship motion influenced by both vessel dynamics and environmental disturbances.
-If external forces that explain the discrepancy between calm-water models and observed motion can be inferred from such data, it becomes possible to reconstruct physically consistent environmental effects without explicitly identifying individual environmental components such as wind and waves.
-The inferred forces can be interpreted not merely as time-series disturbances but as spatially distributed quantities associated with ship motion, leading to the reconstruction of environmental fields.
+On the other hand, recent advances in onboard measurement technologies such as GPS and voyage data recorders have enabled the acquisition of abundant observational data, including ship position and velocity #super[@vu_estimating_2023 @mei_full-scale_2020].
+Although these observations include measurement uncertainty, they directly reflect the actual ship motion influenced by both vessel dynamics and environmental factors.
+This suggests that external forces can be inferred directly from observational data, enabling environmental effects to be reconstructed without relying on explicit environmental measurements.
+The inferred forces can be interpreted not merely as time-series disturbances, but as spatially distributed quantities that encode environmental structure along the ship trajectory.
 
 In this study, an environmental field reconstruction framework is proposed based on inverse estimation of external forces using observational data.
 The unknown external forces are treated as control inputs and estimated by formulating an optimization problem that minimizes the discrepancy between observed and predicted ship motion over a finite horizon.
@@ -54,67 +55,69 @@ This formulation enables temporally consistent estimation of external forces.
 The environmental field is defined not as individual physical quantities such as wind speed or wave height, but as the resultant forces and moments acting on the ship, including the horizontal force vector (magnitude and direction) and yaw moment.
 By associating the estimated forces with the ship’s position and time, the environmental effects are reconstructed as spatially distributed information.
 
-The main contributions of this study are summarized as follows:
+The main contributions of this study are summarized as follows.
+First, environmental field reconstruction is formulated as an inverse problem based on ship maneuvering data.
+Second, an external force estimation method is developed using model predictive control, where external forces are treated as control inputs.
+Third, model uncertainty is incorporated through a probabilistic system identification approach, enabling multi-model-based estimation.
+Finally, a representative external force is determined using a medoid-based selection method that preserves the correlation structure among force components.
 
-- An environmental field reconstruction framework is proposed, in which the discrepancy between calm-water maneuvering models and observed data is formulated as an inverse problem, enabling the estimation of external forces as both time-series and spatial information with temporal consistency.
-- The proposed method is validated using simulation data considering model uncertainty and varying maneuvering conditions, as well as free-running model test data under wave conditions, demonstrating its effectiveness.
+This framework provides a new perspective on environmental estimation by shifting from forward modeling to inverse reconstruction based on ship motion data.
 
+= Related Studies
 
-= Related Work
+== System Identification of Maneuvering Models with Uncertainty
 
-== System Identification of Ship Maneuvering Models
+This section reviews studies on the system identification of ship maneuvering models.
+When identifying ship maneuvering models using observational data obtained in real sea conditions, the data inevitably include uncertainty such as measurement noise.
+Therefore, it is difficult to determine model parameters as unique deterministic constants.
 
-This section reviews studies on the identification of ship maneuvering models.
-As discussed above, when identifying ship maneuvering models using observational data obtained in real sea conditions, the data inevitably include uncertainty such as measurement noise.
-Therefore, it is difficult to uniquely determine model parameters as deterministic constants.
+To address this issue, Mitsuyuki et al.#super[@mitsuyuki_mmg_2024] proposed a method based on Markov Chain Monte Carlo (MCMC) for estimating hydrodynamic maneuvering coefficients in the MMG model from noisy observational data.
+In this approach, hydrodynamic maneuvering coefficients are treated not as deterministic values but as random variables with associated uncertainty.
 
-To address this issue, Mitsuyuki et al. proposed a method based on Markov Chain Monte Carlo (MCMC) for estimating hydrodynamic derivatives in the MMG model from noisy observational data.
-In this approach, hydrodynamic derivatives are treated not as deterministic values but as random variables with associated uncertainty.
-
-To account for measurement errors in observational data, the following observation model is defined using independent normal distributions.
+To account for measurement errors in observational data, the following probabilistic observation model is defined using independent normal distributions.
 
 $
-u_italic("obs")(t)~N(u(t), sigma_u) 
-v_italic("obs")(t)~N(v(t), sigma_v) 
+u_italic("obs")(t)~N(u(t), sigma_u)\
+v_italic("obs")(t)~N(v(t), sigma_v)\
 r_italic("obs")(t)~N(r(t), sigma_r)
-$ [eq:observation_model](eq:observation_model)
+$ <eq:observation_model>
 
 Here, $u_italic("obs")(t), v_italic("obs")(t), r_italic("obs")(t)$ denote the observed velocity components at time $t$, $u(t), v(t), r(t)$ represent the true values, and $sigma_u, sigma_v, sigma_r$ are the standard deviations of the measurement noise.
 
-By combining this observation model with MCMC-based sampling, multiple sets of hydrodynamic derivatives can be obtained while explicitly accounting for observational uncertainty.
+By combining this observation model with MCMC-based sampling, multiple sets of hydrodynamic maneuvering coefficients can be obtained while explicitly accounting for observational uncertainty.
 In this study, the same MCMC-based approach is employed to construct uncertain calm-water maneuvering models from observational data.
-These models are then used as predictive models for external force estimation in the subsequent framework.
+These models are then used as uncertainty-aware predictive models for external force estimation in the proposed framework.
 
-== Related Studies on External Force Estimation
+== External Force Estimation
 
 This section reviews existing approaches for estimating unknown external forces based on discrepancies between observational data and mathematical models, and clarifies the position of this study.
 
-Environmental information such as wind and waves can be obtained using wave buoys or satellite observations.
+Environmental information such as wind, waves and currents can be obtained using wave buoys or satellite observations #super[@ERA5_global_2020].
 However, these measurements are typically limited to fixed locations or large-scale observations, making it difficult to accurately capture local disturbances acting on a ship during navigation.
 Furthermore, equipping all vessels with high-precision measurement systems is impractical from both cost and operational perspectives.
 
 Motivated by these limitations, approaches have been proposed to estimate external forces based on the difference between observed data and model outputs.
 Among them, disturbance observer (DOB)-based methods have been widely studied #super[@gu_disturbance_2022 @menges_environmental_2023].
-DOB estimates unknown disturbances sequentially based on the residual between observed states and model predictions, and is suitable for real-time applications.
+DOB estimates unknown disturbances based on the residual between observed states and model predictions, and is suitable for real-time applications.
 
 However, in DOB-based approaches, external forces are typically estimated independently at each time step based on instantaneous residuals.
-As a result, the estimates are sensitive to measurement noise and tend to exhibit oscillatory behavior.
+As a result, the estimates are sensitive to measurement noise and tend to exhibit oscillatory behavior due to noise sensitivity.
 In addition, the estimated forces are often treated as time-series signals, and their spatial structure or physical interpretation is not explicitly considered.
 
-Another class of approaches is based on Moving Horizon Estimation (MHE), in which states and disturbances are estimated using observational data over a finite time window.
+Another class of approaches is based on Moving Horizon Estimation (MHE)#super[@liu_moving_2025 @SCHILLER2024341], where states and disturbances are estimated over a finite time window.
 Since MHE is formulated as an optimization problem over a finite horizon, it is more robust to noise and can enforce temporal consistency in the estimation.
 However, MHE is primarily designed for state estimation, and external forces are often treated as auxiliary variables introduced to explain the observations.
 
-In contrast, the external forces considered in this study, such as those induced by wind and waves, are not negligible disturbances but can have a dominant impact on ship maneuvering.
+In contrast, the external forces considered in this study, such as those induced by wind, waves and currents, are not negligible disturbances but can have a dominant impact on ship maneuvering.
 These forces possess temporal and spatial structures and should therefore be explicitly treated as primary estimation targets rather than auxiliary variables.
 
-For this reason, this study adopts an approach in which external forces are explicitly treated as control inputs and estimated using a model predictive control (MPC) framework.
+For this reason, this study adopts an approach in which external forces are explicitly treated as control inputs and estimated using a model predictive control (MPC)#super[@rawlings_mpc_2017 @QIN2003733] framework.
 Specifically, external forces are obtained by solving an optimization problem that minimizes the discrepancy between observed data and model predictions over a finite horizon.
 This formulation enables the estimation of temporally consistent force sequences, in contrast to stepwise estimation based on instantaneous residuals.
 
 Furthermore, the objective of this study is not limited to time-series estimation of external forces.
 By associating the estimated forces with vessel position data, the forces are reconstructed as spatially distributed environmental fields.
-Unlike conventional disturbance estimation or state estimation approaches, this study reformulates external force estimation as an inverse problem for environmental field reconstruction.
+Unlike conventional disturbance estimation or state estimation approaches, this study reformulates external force estimation as an inverse problem, enabling environmental field reconstruction.
 
 
 = Proposed Method
@@ -128,37 +131,37 @@ Unlike conventional disturbance estimation or state estimation approaches, this 
 ) <fig:proposed_method>
 
 An overview of the proposed method is shown in @fig:proposed_method.
-The proposed framework estimates environmental fields as an inverse problem based on observational data obtained from a ship operating in real sea conditions and mathematical models with inherent uncertainty.
+The proposed framework formulates environmental field reconstruction as an inverse problem based on observational data obtained from a ship operating in real sea conditions and mathematical models with inherent uncertainty.
 
-First, observational data such as ship position and velocity, as well as control input data including rudder angle and propeller rotation speed, are obtained from onboard measurement systems such as the voyage data recorder (VDR).
+First, observational data such as ship position and velocity, as well as control input data including rudder angle and propeller rotation speed, are obtained from onboard measurement systems such as voyage data recorder.
 
-Next, the control inputs are fed into the predictive model to simulate future ship motion.
+Next, the control inputs are applied to the predictive model to simulate future ship motion.
 In the proposed method, external forces are estimated by formulating an optimization problem that minimizes the discrepancy between observed data and predicted motion over a finite horizon.
 The cost function consists of the difference between observed ship states and model outputs, as well as a penalty term on the temporal variation of external forces treated as control inputs.
 This penalty suppresses non-physical rapid fluctuations and enables the estimation of temporally consistent force sequences.
 
 The predictive model is constructed by augmenting a calm-water ship maneuvering model with external force terms.
-External forces that minimize the cost function are obtained, and the ship motion is sequentially updated using the estimated forces to generate time-series data of external forces.
+The optimal external forces are obtained by minimizing the cost function, and the ship motion is sequentially updated using the estimated forces to generate time-series data of external forces.
 
 In real operations, ship dynamics vary depending on loading conditions and operating environments.
 Therefore, the proposed method employs models identified from observational data as predictive models.
-The identification is performed using the MCMC-based probabilistic system identification method described in the previous section, yielding multiple sets of hydrodynamic derivatives.
+The identification is performed using the MCMC-based probabilistic system identification method  ddddd#super[@mitsuyuki_mmg_2024] described in the previous section, yielding multiple sets of hydrodynamic maneuvering coefficients representing model uncertainty.
 
-To account for model uncertainty, multiple predictive models with different parameter sets are prepared, and external force estimation using MPC is performed for each model.
+To account for model uncertainty, multiple predictive models with different hydrodynamic maneuvering coefficient sets are prepared, and external force estimation using MPC is performed for each model.
 This approach yields multiple time-series estimates of external forces reflecting model uncertainty.
 
-Finally, statistical representative values are extracted from the distribution of estimated forces and associated with the ship’s position.
-By linking force estimates with spatial coordinates, the external forces are reconstructed as spatially distributed information, referred to as environmental fields.
+Finally, representative values are extracted from the distribution of estimated forces and associated with the ship’s position.
+By linking force estimates with spatial coordinates, the external forces are reconstructed as spatially distributed environmental fields.
 
 == Predictive Model Formulation
 
-This section describes the construction of the predictive model used in the model predictive control (MPC) framework and the treatment of model uncertainty.
+This section presents the predictive model used in the model predictive control (MPC) framework and the treatment of model uncertainty.
 
-As described in the previous section, the proposed method employs multiple predictive models with different sets of hydrodynamic derivatives.
+As described in the previous section, the proposed method employs multiple predictive models with different sets of hydrodynamic maneuvering coefficients.
 Each predictive model is based on a three-degree-of-freedom MMG model in calm water, augmented with external force terms.
 
-In the conventional MMG model, ship motion is described by the sum of hull forces $H$, rudder forces $R$, and propeller thrust $P$.
-In this study, external force components $(X_F, Y_F, N_F)$ are additionally introduced, and the governing equations are expressed as follows.
+In the conventional MMG model for ship maneuvering, ship motion is described as the sum of hull forces $H$, rudder forces $R$, and propeller thrust $P$.
+In this study, external force components $(X_F, Y_F, N_F)$ are explicitly introduced, and the governing equations are expressed as follows.
 
 $
 dot(u)&=(X_H+X_R+X_P+X_F+(m+m_y)v r)/(m+m_x) \
@@ -166,24 +169,24 @@ dot(v)&=(Y_H+Y_R+Y_F-(m+m_x)u r)/(m+m_y) \
 dot(r)&=(N_H+N_R+N_F)/(I_z+J_z)
 $<eq:predictive_model>
 
-Here, the hydrodynamic force components $(X_H, Y_H, N_H)$ include maneuvering hydrodynamic derivatives.
-In the proposed method, multiple predictive models are constructed by substituting different sets of derivatives obtained through MCMC-based identification into these terms, while maintaining the same functional structure.
+Here, the hydrodynamic force components $(X_H, Y_H, N_H)$ are expressed as functions of hydrodynamic maneuvering coefficients #super[@yasukawaIntroductionMMGStandard2015].
+In the proposed method, multiple predictive models are constructed by substituting different sets of hydrodynamic maneuvering coefficients obtained through MCMC-based identification into these force components, while maintaining the same functional structure.
 
 Next, the state variables used in the MPC framework are defined.
 In this study, the ship is assumed to be a rigid body, and its planar motion is described by three degrees of freedom, namely surge, sway, and yaw.
 
 The position and orientation of the ship can be represented as geometric information on a plane.
 Therefore, the state variables can be defined as a finite set of variables based on spatial coordinates.
-Although the choice of state representation is not unique, a four-dimensional state vector defined by the positions of the bow and stern is adopted in this study as an example.
+Although the choice of state representation is not unique, a four-dimensional state vector defined by the positions of the bow and stern is adopted here as a representative example, as it provides a geometrically intuitive and numerically stable description of both translational and rotational motion.
 
 $
 bold(x) = [x_b, y_b, x_s, y_s]^T
 $
 
 This representation enables a geometric description of both translational and rotational motion of the ship.
-It should be noted that the definition of the state variables is not essential to the proposed framework, and alternative coordinate systems or state representations can also be employed.
+The state definition is not restricted to the proposed framework, and alternative coordinate systems or state representations can also be employed.
 
-These coordinates are computed from the body-fixed velocities and angular velocity $(u, v, r)$, the heading angle $psi$, and the geometric properties of the ship.
+These coordinates are computed from the body-fixed velocities and angular velocity $(u, v, r)$, the heading angle $psi$, and the geometric properties of the ship through kinematic relationships.
 
 The external force components $(X_F, Y_F, N_F)$ are treated as the control input vector in the MPC formulation.
 
@@ -199,25 +202,25 @@ $<eq:state_variables_derivative>
 
 == External Force Estimation Using MPC
 
-This section describes the estimation of external force components based on a model predictive control (MPC) framework.
+This section presents the external force estimation method based on a model predictive control (MPC) framework.
 In the proposed method, external forces are treated as control inputs and estimated so that the predicted ship motion is consistent with the observed data.
 
 The objective is not trajectory tracking but to derive a sequence of external forces that best explains the observed ship motion.
 Therefore, the problem is formulated as an inverse problem.
 
-First, the continuous-time model given in @eq:discrete_model is discretized with a control interval $Delta t$.
-This yields the following discrete-time model.
+First, the continuous-time model is discretized with a control interval $Delta t$, resulting in the discrete-time model shown in @eq:discrete_model.
+This results in the following discrete-time model.
 
 $
 bold(x)_(t+1)=F(bold(x)_t, bold(u)_t)
 $<eq:discrete_model>
 
-Next, the cost function is defined.
-In this study, the cost function consists of a tracking error term based on the difference between the predicted states and the observed states, and a penalty term on the temporal variation of the control inputs representing external forces.
+Next, the cost function for the external force estimation is defined.
+In this study, the cost function consists of a tracking error term that penalizes the discrepancy between the predicted and observed states, and a regularization term that penalizes the temporal variation of the control inputs representing external forces.
+
 
 Let the prediction horizon be $N$.
-The cost function $J$ is formulated as the following optimization problem.
-
+The external force estimation problem is formulated as the following optimization problem.
 $
 min J(t) =
     sum_(k=1)^(N)(
@@ -234,23 +237,29 @@ min J(t) =
       bold(e)_(t+k)=bold(x)_(t+k)-bold(x)_(t+k)^(italic("ref")),
       bold(x)_(t+1)=F(bold(x)_t, bold(u)_t),
       bold(x)_0=bold(x)_("init"),
-      Delta bold(u)_(t+k) = bold(u)_(t+k) - bold(u)_(t+k-1),
     )
 $ <eq:mpc_optimization_problem>
 
-Here, $bold(e)_(t+k)$ denotes the state error at time $t+k$, and $bold(x)_(t+k)^(italic("ref"))$ represents the reference state obtained from observational data.
+Here, $bold(e)_(t+k)$ denotes the state error at time $t+k$, and $bold(x)_(t+k)^(italic("ref"))$ represents the reference state obtained from observational data at time $t+k$.
 $bold(x)_("init")$ denotes the initial state.
-$Delta bold(u)_(t+k)$ represents the temporal variation of the control inputs.
+$Delta bold(u)_(t+k)$ represents the temporal variation of the control inputs as follows:
+$
+Delta bold(u)_(t+k) = bold(u)_(t+k) - bold(u)_(t+k-1)
+$
+The initial input $bold(u)_t$ is given from the previous time step.
+No explicit constraints are imposed on the control inputs, as the regularization term ensures physically reasonable solutions.
+This formulation avoids additional constraint tuning while maintaining smooth and stable force estimation.
 
 The weighting matrices $bold(Q)$ and $bold(R)$ correspond to the state error and input variation, respectively.
 By adjusting these weights, the characteristics of the estimated external force sequence can be controlled.
 A larger $bold(Q)$ improves the agreement with observed data but may result in larger fluctuations in the estimated forces.
 In contrast, a larger $bold(R)$ suppresses rapid variations in the external forces and yields smoother force sequences.
 
-By solving this optimization problem sequentially at each time step, a temporally consistent sequence of external forces can be obtained.
+By solving this optimization problem sequentially at each time step, a temporally consistent and physically plausible sequence of external forces can be obtained.
 
 == Environmental Field Reconstruction
 
+In this study, the environmental field is defined as the spatial distribution of external forces acting on the vessel along its trajectory.
 By applying MPC to $n$ predictive models that account for model uncertainty, $n$ sets of estimated external forces are obtained at each time step $t$ as follows.
 
 $
@@ -262,9 +271,10 @@ This section describes the method for determining representative external forces
 A common approach for determining representative values from multiple estimates is to use statistical measures such as the mean or median.
 However, these methods process each component independently and may destroy the correlation structure among the force components, resulting in physically inconsistent combinations.
 
-To address this issue, the proposed method treats the three force components as a single vector and selects an existing estimate that is closest to the center of the distribution as the representative value.
-This can be interpreted as a robust estimation of a representative point in a multidimensional space.
+To address this issue, the proposed method treats the three force components as a single vector and selects one of the estimated force vectors that is closest to the center of the distribution in terms of pairwise distances.
+This can be interpreted as a robust estimation of a representative point in a multidimensional space, analogous to the concept of a medoid.
 
+Each component is normalized to ensure comparable scaling among the force components, for example by dividing by characteristic magnitudes.
 Specifically, for the $i$-th normalized force vector at time $t$
 
 $
@@ -291,7 +301,7 @@ $
 
 is defined as the representative external force at time $t$.
 
-This approach suppresses the influence of outliers while preserving the correlation structure among force components, thereby ensuring physically consistent estimates.
+This approach suppresses the influence of outliers while preserving the inherent correlation structure among the force components, which is essential for maintaining physical consistency.
 
 Finally, the representative external forces at each time step are transformed into the earth-fixed coordinate system.
 This enables the external forces acting on the ship to be associated with spatial positions and represented as an environmental field.
@@ -307,23 +317,22 @@ $ <eq:environmental_field>
 Through this process, the estimated external force sequence is reconstructed as a spatial distribution along the ship trajectory.
 That is, the set $(E F_italic("mag")_t, E F_italic("dir")_t, E F_italic("mom")_t)$ represents the environmental effects acting on the ship at each position.
 
-In this way, the proposed method extends external force estimation beyond time-series analysis and formulates it as a reconstruction problem of spatially distributed environmental information.
+In this way, the proposed method extends external force estimation beyond time-series analysis and formulates it as a reconstruction problem of spatially distributed environmental fields.
 
 
 = Case Study
 
-In this section, case studies using both simulation data and experimental data are conducted to validate the effectiveness of the proposed method.
+In this section, case studies using both simulation data and experimental data are conducted to validate the effectiveness and applicability of the proposed method.
 
-In real operations, ship conditions and environmental factors vary for each voyage, and therefore models identified in advance through captive tests or tank experiments are not always directly applicable.
+In real operations, ship conditions and environmental factors vary for each voyage, and therefore models identified in advance through captive tests or tank experiments are  not necessarily applicable without re-identification.
 For this reason, the proposed framework assumes that both model identification and external force estimation are performed based on observational data obtained during actual voyages.
 
-Specifically, it is assumed that a single voyage dataset contains both segments that can be regarded as calm-water conditions with relatively small disturbances and segments strongly affected by environmental disturbances such as wind and waves.
-First, the MCMC-based identification method is applied to the calm-water segments to estimate the distribution of hydrodynamic derivatives and construct multiple predictive models.
+Specifically, it is assumed that a single voyage dataset can be segmented into periods corresponding to calm-water conditions with relatively small disturbances and periods strongly affected by environmental disturbances such as wind and waves.
+First, the MCMC-based identification method is applied to the calm-water segments to estimate the distribution of hydrodynamic maneuvering coefficients and construct multiple predictive models.
 Next, the proposed method is applied to the disturbance segments to estimate the time-series external forces and reconstruct the environmental field.
 
 In this case study, model identification and external force estimation are performed separately under conditions that emulate real operational scenarios.
-This setup allows the applicability of the proposed framework to be evaluated in a realistic context.
-
+This setup enables a systematic evaluation of the proposed framework under realistic operational conditions.
 
 == Validation Using Simulation Data
 
@@ -338,7 +347,7 @@ The full-scale KCS container ship is used for data generation.
 Its principal particulars are described in Okuda et al. #super[@okuda_validation_2023].
 
 First, the generation of calm-water observational data is described.
-A three-degree-of-freedom MMG simulation in calm water is performed using the hydrodynamic derivatives of the target vessel, and the resulting motion data are used as the basis of the observational dataset.
+A three-degree-of-freedom MMG simulation in calm water is performed using the hydrodynamic maneuvering coefficients of the target vessel, and the resulting motion data are used as the basis of the observational dataset.
 To emulate measurement errors in onboard sensors, zero-mean white Gaussian noise is added to the velocity components $u, v, r$, and the resulting data are treated as observational data.
 
 #figure(
@@ -394,10 +403,10 @@ The proposed method is applied to the generated disturbance dataset to evaluate 
 
 This subsection describes the parameter settings for the MCMC-based identification and the model predictive control (MPC) used for environmental field estimation.
 
-First, the prior distributions of the hydrodynamic derivatives required for the MCMC-based identification are defined.
+First, the prior distributions of the hydrodynamic maneuvering coefficients required for the MCMC-based identification are defined.
 To avoid bias toward specific parameter values, uniform distributions are assigned following the approach in previous work #super[@mitsuyuki_mmg_2024].
 The number of samples is set to 1500, and the initial 500 samples are discarded as burn-in to remove non-converged samples.
-From the resulting posterior distribution, 50 sets of hydrodynamic derivatives are randomly selected and used to construct multiple predictive models reflecting model uncertainty.
+From the resulting posterior distribution, 50 sets of hydrodynamic maneuvering coefficients are randomly selected and used to construct multiple predictive models reflecting model uncertainty.
 
 Next, the parameter settings for the MPC are described.
 The prediction horizon $N$, control interval $Delta t$, and control duration $T$ are summarized in @tab:mpc_params.
@@ -452,7 +461,7 @@ with propeller revolution $n_p = 1.75 "rps"$ and rudder angle $delta = 20 "deg"$
 The observational data are generated under the Noise L2 condition.
 
 The calm-water turning data are shown in @fig:observed_data.
-The MCMC method is applied to this dataset to identify the hydrodynamic derivatives.
+The MCMC method is applied to this dataset to identify the hydrodynamic maneuvering coefficients.
 
 #figure(
   placement: none,
@@ -463,18 +472,17 @@ The MCMC method is applied to this dataset to identify the hydrodynamic derivati
 #figure(
   placement: none,
   image("figs/fig_03.svg", width: 100%),
-  caption: [Prior and posterior distributions of hydrodynamic coefficients.],
+  caption: [Prior and posterior distributions of hydrodynamic maneuvering coefficients.],
 ) <fig:posterior_distributions>
 
 #figure(
   placement: none,
   image("figs/fig_04.svg", width: 100%),
-  caption: [Calm-water simulation using the identified hydrodynamic derivatives.],
+  caption: [Calm-water simulation using the identified hydrodynamic maneuvering coefficients.],
 ) <fig:calm_water_simulation>
 
-The posterior distributions of the hydrodynamic derivatives are shown in @fig:posterior_distributions , and the calm-water simulation results using 50 model sets sampled from the posterior distribution are presented in @fig:calm_water_simulation.
-All models successfully reproduce the trajectory of the observed data, indicating that a set of predictive models has been constructed that is both physically consistent and capable of capturing the uncertainty arising from observational noise.
-
+The posterior distributions of the hydrodynamic maneuvering coefficients are shown in @fig:posterior_distributions, and the calm-water simulation results using 50 model sets sampled from the posterior distribution are presented in @fig:calm_water_simulation.
+All models successfully reproduce the trajectory of the observed data with good agreement, indicating that a set of predictive models has been constructed that is both physically consistent and capable of representing uncertainty arising from observational noise.
 Next, the proposed method is applied to disturbance data under different maneuvering conditions using the identified predictive model set.
 The trajectory reconstruction results for each maneuvering condition are shown in @fig:trajectory_tracking, the estimated external forces are presented in @fig:external_force_estimation , and the reconstructed environmental fields are shown in @fig:environmental_field.
 
@@ -497,7 +505,7 @@ The trajectory reconstruction results for each maneuvering condition are shown i
 ) <fig:environmental_field>
 
 As shown in @fig:trajectory_tracking, the trajectory reconstruction agrees well with the observed data for all maneuvering conditions.
-However, significant differences are observed in the external force estimation results and the reconstructed environmental fields depending on the maneuvering condition.
+However, clear and systematic differences are observed in the external force estimation results and the reconstructed environmental fields depending on the maneuvering condition.
 
 In the turning test, both the temporal profiles of the estimated external forces and the magnitude and direction of the reconstructed environmental field show good agreement with the ground truth.
 In contrast, in the straight-line motion case, $Y_F$ and $N_F$ converge close to the ground truth, while $X_F$ exhibits a large variance in the estimated distribution, indicating pronounced model uncertainty.
@@ -506,17 +514,18 @@ Furthermore, in the sinusoidal rudder case, the variance of the estimated extern
 A similar trend is observed in the visualization of the environmental field.
 In the turning test, the reconstructed environmental field is consistent with the ground truth, whereas in the straight-line and sinusoidal rudder cases, significant discrepancies are observed in both magnitude and direction.
 
-These results indicate that the accuracy of environmental field estimation in the proposed method strongly depends on the predictive capability of the model.
+These results indicate that the accuracy of environmental field estimation in the proposed method strongly depends on the predictive capability and generalization performance of the model.
 Specifically, high estimation accuracy is achieved for maneuvering conditions similar to those used in the model identification, whereas for different motion modes, modeling errors increase and manifest as uncertainty in the external force estimation.
 
 Therefore, to ensure robust environmental field estimation across a wide range of maneuvering conditions, it is essential to improve the generalization capability of the predictive model by incorporating observational data that include diverse motion modes, such as turning, straight motion, and acceleration/deceleration, during the model identification stage.
+
 
 ==== Impact of Model Uncertainty
 
 This subsection investigates the effect of model uncertainty on environmental field estimation by varying the observation noise level of the calm-water data used for model identification across three levels.
 In particular, the propagation of model uncertainty into external force estimation and environmental field reconstruction is examined.
 
-As shown in @fig:observed_data and @fig:calm_water_simulation the spread of the posterior distributions of the hydrodynamic derivatives varies depending on the magnitude of observational noise.
+As shown in @fig:observed_data and @fig:calm_water_simulation, the spread of the posterior distributions of the hydrodynamic maneuvering coefficients varies depending on the magnitude of observational noise.
 The calm-water simulation results using 50 model sets identified under each noise level are presented in @fig:calm_water_simulation_noise.
 In the case of Noise L1, where the observation error is the largest, the variance of the identified parameters increases significantly, resulting in a wider spread of the predicted trajectories.
 
@@ -566,8 +575,7 @@ Therefore, the proposed method is capable of reconstructing key features of the 
 === Validation Using Free-Running Model Test Data
 
 This section validates the proposed method using measured data obtained from free-running model tests.
-Unlike simulation data, the experimental data include measurement noise and unmodeled disturbances, and thus are used to evaluate the applicability of the method under more realistic conditions.
-
+Unlike simulation data, the experimental data include measurement noise and unmodeled disturbances, and thus are used to evaluate the robustness and practical applicability of the proposed method under realistic operational conditions.
 The model ship is a coastal container vessel, and turning test data with a rudder angle of $-35$ degrees in both calm water and regular waves are used.
 The wave direction is $180$ degrees, corresponding to the positive $x$-axis in the earth-fixed coordinate system.
 
@@ -585,6 +593,7 @@ $
 $ <eq:mpc_weights_model_test>
 
 Here, compared to the simulation case, larger values of $bold(R)$ are adopted to suppress the influence of noise contained in the experimental data and to improve the stability of external force estimation.
+This reflects a trade-off between tracking accuracy and noise robustness, which becomes more critical in experimental conditions.
 
 #figure(
   placement: none,
@@ -616,7 +625,7 @@ This subsection presents the results of applying the proposed method to free-run
 
 The predictive model set is constructed using calm-water turning test data with a rudder angle of $-35$ degrees.
 The observed calm-water data are shown in @fig:observed_data_model.
-The MCMC method is applied to this dataset to identify the hydrodynamic derivatives.
+The MCMC method is applied to this dataset to identify the hydrodynamic maneuvering coefficients.
 The posterior distributions of the identified parameters are shown in @fig:posterior_model, and the calm-water simulation results using 50 model sets sampled from the posterior distribution are presented in @fig:calm_water_simulation_model.
 
 #figure(
@@ -628,7 +637,7 @@ The posterior distributions of the identified parameters are shown in @fig:poste
 #figure(
   placement: none,
   image("figs/fig_13.svg", width: 100%),
-  caption: [Prior and posterior distributions of hydrodynamic coefficients.],
+  caption: [Prior and posterior distributions of hydrodynamic maneuvering coefficients.],
 ) <fig:posterior_model>
 
 #figure(
@@ -658,40 +667,41 @@ In contrast, the reconstructed environmental fields exhibit characteristic diffe
 
 Under head-wave conditions in the early stage of the turning motion, the estimated representative external force vectors are generally aligned with the wave propagation direction (positive $x$-axis), indicating that both the direction and magnitude of the environmental field are reasonably captured.
 In head-wave conditions, wave-induced forces dominantly affect the ship motion, and motion changes such as deceleration are clearly observed.
-As a result, disturbance information is strongly reflected in the observed data, allowing the estimation to overcome model inaccuracies and achieve reliable environmental field reconstruction.
+As a result, disturbance information is strongly reflected in the observed data, allowing the estimation to partially compensate for model inaccuracies and achieve reasonable environmental field reconstruction.
 
 On the other hand, as the turning motion progresses into beam and oblique wave conditions, the direction of the estimated external force vectors deviates from the positive $x$-axis, and the dispersion of the estimates increases.
-This behavior is not attributed to parameter estimation accuracy, but rather to limitations in the model structure.
+This behavior is not attributed to parameter estimation accuracy, but rather to inherent limitations in the model structure.
 
 The 3-DOF model used in this study does not account for roll motion, whereas in beam-wave conditions, roll-induced hydrodynamic effects significantly influence the ship motion.
 Consequently, the MPC attempts to compensate for these effects using only the in-plane components ($X, Y, N$), leading to estimated external forces that are not consistent with the actual wave direction.
 
 These results indicate that the proposed method can reconstruct a reasonable environmental field from experimental data when disturbances are dominant, while the estimation accuracy is limited when the model structure cannot adequately represent the disturbance response.
+This highlights both the practical effectiveness and the inherent limitations of the proposed framework under realistic conditions.
 
 Therefore, to extend the applicability of the method to more general sea conditions, it is important to enhance the model representation capability, for example by extending the model to higher degrees of freedom including roll motion.
 
 
 = Conclusion
 
-This study proposed an inverse environmental field reconstruction framework that estimates external forces acting on a ship by inverse analysis based on the discrepancy between a calm-water ship maneuvering model and observed data, while accounting for model uncertainty.
-Unlike conventional approaches that treat external forces as disturbances, the proposed method reconstructs them as a spatially distributed environmental field.
+This study proposed an inverse environmental field reconstruction framework that estimates external forces acting on a ship from the discrepancy between a calm-water maneuvering model and observed data while accounting for model uncertainty.
+Unlike conventional approaches that treat external forces as disturbances, the proposed method explicitly reconstructs them as a spatially distributed environmental field.
 
 From validation using both simulation data and free-running model test data, the following findings were obtained.
 
-- By extracting a representative value from the distribution of estimated external forces obtained from a set of uncertainty-aware predictive models identified from observational data, a physically consistent environmental field can be constructed. Even when model uncertainty increases, the representative-value-based estimation enables robust capture of disturbance trends.
+- By extracting a representative value from the distribution of estimated external forces obtained from a set of uncertainty-aware predictive models identified from observational data, a physically consistent environmental field can be constructed. Even under increased model uncertainty, the representative-value-based approach enables robust capture of disturbance trends.
 
-- The accuracy of environmental field reconstruction strongly depends on the predictive capability of the model. High estimation accuracy is achieved under maneuvering conditions similar to those used for model identification, whereas for different motion modes, modeling errors increase and manifest as uncertainty in the estimation results.
+- The accuracy of environmental field reconstruction strongly depends on the predictive capability of the model. High estimation accuracy is achieved under maneuvering conditions similar to those used for model identification, whereas for different motion modes, modeling errors increase and manifest as increased uncertainty in the estimation results.
 
-- Application to free-running model test data demonstrated that the proposed method can reconstruct a reasonable environmental field from experimental data under disturbance-dominant conditions such as head waves. In contrast, under beam and following wave conditions, the estimation accuracy decreases due to limitations in the model structure associated with neglecting roll motion, highlighting the need for model extension.
+- Application to free-running model test data demonstrated that the proposed method can reconstruct a physically reasonable environmental field from experimental data under disturbance-dominant conditions such as head waves. In contrast, under beam and following wave conditions, the estimation accuracy decreases due to limitations in the model structure associated with neglecting roll motion, highlighting the need for model extension.
 
-These results indicate that the proposed framework can reconstruct the spatial characteristics of disturbances acting on a ship even under realistic conditions with model uncertainty and observational noise.
+These results demonstrate that the proposed framework provides a practical and robust approach for reconstructing the spatial characteristics of disturbances acting on a ship under realistic conditions with model uncertainty and observational noise.
 
-Future work includes extending the model to higher degrees of freedom incorporating roll motion and improving model generalization by using diverse maneuvering data for model identification, aiming at broader applicability to various sea conditions.
+Future work includes extending the model to higher degrees of freedom incorporating roll motion and improving model generalization by using diverse maneuvering data for model identification, thereby enhancing the applicability of the framework to a wider range of sea conditions.
 
 
 = Acknowledgements
 
-This work was supported by JSPS KAKENHI Grant Number JP24K07902.
+This work was supported by JSPS KAKENHI Grant Number JP24K07902 and the Japan Science and Technology Agency Moonshot R&D Program Grant JPMJMS2282.
 
 #bibliography("references.bib",
  title: "References",
