@@ -609,7 +609,7 @@ In other words, although the variability of the estimates increases, the dominan
 Therefore, the proposed method is capable of reconstructing key features of the environmental field, such as the direction and magnitude of disturbances, with reasonable accuracy even under conditions with significant model uncertainty.
 
 
-=== Validation Using Free-Running Model Test Data
+== Validation Using Free-Running Model Test Data
 
 This section validates the proposed method using measured data obtained from free-running model tests.
 Unlike simulation data, the experimental data include measurement noise and unmodeled disturbances, and thus are used to evaluate the robustness and practical applicability of the proposed method under realistic operational conditions.
