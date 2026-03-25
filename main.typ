@@ -160,13 +160,13 @@ Unlike conventional disturbance estimation or state estimation approaches, this 
 
 == Overview
 
-#figure(
-  placement: bottom,
-  image("figs/fig_01.svg", width: 100%),
-  caption: [Overview of the proposed method.],
-) <fig:proposed_method>
+// #figure(
+//   placement: bottom,
+//   image("figs/fig_01.svg", width: 100%),
+//   caption: [Overview of the proposed method.],
+// ) <fig:proposed_method>
 
-An overview of the proposed method is shown in @fig:proposed_method.
+// An overview of the proposed method is shown in @fig:proposed_method.
 The proposed framework formulates environmental field reconstruction as an inverse problem based on observational data obtained from a ship operating in real sea conditions and mathematical models with inherent uncertainty.
 
 First, observational data such as ship position and velocity, as well as control input data including rudder angle and propeller rotation speed, are obtained from onboard measurement systems such as voyage data recorder.
