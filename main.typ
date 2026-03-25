@@ -68,7 +68,7 @@ However, these models primarily describe ship behavior in calm water and do not 
 
 Conventionally, ship maneuvering models have been identified through PMM (Planar Motion Mechanism) tests #super[@ZHU2022103327], captive model tests (CMT) #super[@ueno_circular_2009], or computational fluid dynamics (CFD) analyses #super[@kume_measurements_2006].
 These approaches enable highly accurate identification of hydrodynamic maneuvering coefficients under specific operating conditions.
-However, in actual operations, ship conditions vary due to factors such as loading conditions, ballast changes, and operational environments, leading to variations in hydrodynamic parameters.
+However, in actual operations, ship conditions vary due to factors such as loading conditions, ballast changes, and operational environments, leading to variations in hydrodynamic maneuvering coefficients.
 Data-driven identification methods using onboard observations have been proposed to address this issue #super[@hasan_discovering_2025 @REN2023109422], but the identified models inevitably include uncertainty due to measurement noise and data limitations #super[@mitsuyuki_mmg_2024].
 
 In real sea conditions, environmental factors such as wind, waves and currents play a dominant role in ship motion.
@@ -105,7 +105,7 @@ This framework provides a new perspective on environmental estimation by shiftin
 
 This section reviews studies on the system identification of ship maneuvering models.
 When identifying ship maneuvering models using observational data obtained in real sea conditions, the data inevitably include uncertainty such as measurement noise.
-Therefore, it is difficult to determine model parameters as unique deterministic constants.
+Therefore, it is difficult to determine model coefficients as unique deterministic constants.
 
 To address this issue, Mitsuyuki et al.#super[@mitsuyuki_mmg_2024] proposed a method based on Markov Chain Monte Carlo (MCMC) for estimating hydrodynamic maneuvering coefficients in the MMG model from noisy observational data.
 In this approach, hydrodynamic maneuvering coefficients are treated not as deterministic values but as random variables with associated uncertainty.
@@ -388,7 +388,7 @@ A three-degree-of-freedom MMG simulation in calm water is performed using the hy
 To emulate measurement errors in onboard sensors, zero-mean white Gaussian noise is added to the velocity components $u, v, r$, and the resulting data are treated as observational data.
 
 #figure(
-  caption: [Standard deviations of white Gaussian noise],
+  caption: [Standard deviations of the added white Gaussian noise],
   placement: none, // top, bottom, auto, none
   table(
     columns: 4,
@@ -415,7 +415,7 @@ The disturbance conditions used in this validation are summarized in @tb:disturb
 In the earth-fixed coordinate system, the positive $x$-axis is defined as 0 degrees, and the clockwise direction is taken as positive.
 
 #figure(
-  caption: [Environmental disturbance conditions],
+  caption: [Environmental disturbance conditions used in the simulation],
   placement: none, // top, bottom, auto, none
   table(
     columns: 2,
@@ -427,7 +427,7 @@ In the earth-fixed coordinate system, the positive $x$-axis is defined as 0 degr
     [Wind speed: $U_(italic("wind"))$], [9.0$["m/s"]$],
     [Wave direction: $chi$], [90$degree$], 
     [Wind direction: $psi_(italic("wind"))$], [0$degree$],
-    [Wave length to ship length ratio: $lambda"/"L$], [1.0], 
+    // [Wave length to ship length ratio: $lambda"/"L$], [1.0], 
     table.hline()
   ),
   supplement: "Table",
@@ -451,7 +451,7 @@ The prediction horizon is determined by considering the trade-off between comput
 
 #figure(
   placement: none,
-  caption: [MPC parameter settings.],
+  caption: [MPC parameter settings for the simulation case],
   table(
     columns: 3,
     align: left,
@@ -503,19 +503,19 @@ The MCMC method is applied to this dataset to identify the hydrodynamic maneuver
 #figure(
   placement: none,
   image("figs/fig_02.svg", width: 100%),
-  caption: [Observed data in calm water.],
+  caption: [Calm-water observed data for model identification],
 ) <fig:observed_data>
 
 #figure(
   placement: none,
   image("figs/fig_03.svg", width: 100%),
-  caption: [Prior and posterior distributions of hydrodynamic maneuvering coefficients.],
+  caption: [Prior and posterior distributions of the identified hydrodynamic maneuvering coefficients],
 ) <fig:posterior_distributions>
 
 #figure(
   placement: none,
   image("figs/fig_04.svg", width: 100%),
-  caption: [Calm-water simulation using the identified hydrodynamic maneuvering coefficients.],
+  caption: [Calm-water simulation results with the identified hydrodynamic maneuvering coefficients],
 ) <fig:calm_water_simulation>
 
 The posterior distributions of the hydrodynamic maneuvering coefficients are shown in @fig:posterior_distributions, and the calm-water simulation results using 50 model sets sampled from the posterior distribution are presented in @fig:calm_water_simulation.
@@ -526,19 +526,19 @@ The trajectory reconstruction results for each maneuvering condition are shown i
 #figure(
   placement: none,
   image("figs/fig_05.svg", width: 100%),
-  caption: [Trajectory tracking result.],
+  caption: [Trajectory tracking results under different maneuvering conditions],
 ) <fig:trajectory_tracking>
 
 #figure(
   placement: none,
   image("figs/fig_06.svg", width: 100%),
-  caption: [External force estimation result.],
+  caption: [External force estimation results under different maneuvering conditions],
 ) <fig:external_force_estimation>
 
 #figure(
   placement: none,
   image("figs/fig_07.svg", width: 100%),
-  caption: [Environmental field.],
+  caption: [Reconstructed environmental fields under different maneuvering conditions],
 ) <fig:environmental_field>
 
 As shown in @fig:trajectory_tracking, the trajectory reconstruction agrees well with the observed data for all maneuvering conditions.
@@ -564,12 +564,12 @@ In particular, the propagation of model uncertainty into external force estimati
 
 As shown in @fig:observed_data and @fig:calm_water_simulation, the spread of the posterior distributions of the hydrodynamic maneuvering coefficients varies depending on the magnitude of observational noise.
 The calm-water simulation results using 50 model sets identified under each noise level are presented in @fig:calm_water_simulation_noise.
-In the case of Noise L1, where the observation error is the largest, the variance of the identified parameters increases significantly, resulting in a wider spread of the predicted trajectories.
+In the case of Noise L1, where the observation error is the largest, the variance of the identified hydrodynamic maneuvering coefficients increases significantly, resulting in a wider spread of the predicted trajectories.
 
 #figure(
   placement: none,
   image("figs/fig_08.svg", width: 100%),
-  caption: [Calm-water simulation with different noise levels.],
+  caption: [Calm-water simulation results for different noise levels],
 ) <fig:calm_water_simulation_noise>
 
 Next, environmental field estimation is performed for the same disturbance dataset using three sets of predictive models with different levels of uncertainty.
@@ -578,19 +578,19 @@ The trajectory reconstruction results for each noise level are shown in @fig:tra
 #figure(
   placement: none,
   image("figs/fig_09.svg", width: 100%),
-  caption: [Trajectory tracking result with different noise levels.],
+  caption: [Trajectory tracking results for different noise levels],
 ) <fig:trajectory_tracking_noise>
 
 #figure(
   placement: none,
   image("figs/fig_10.svg", width: 100%),
-  caption: [External force estimation result with different noise levels.],
+  caption: [External force estimation results for different noise levels],
 ) <fig:external_force_estimation_noise>
 
 #figure(
   placement: none,
   image("figs/fig_11.svg", width: 100%),
-  caption: [Environmental field result with different noise levels.],
+  caption: [Environmental field results for different noise levels],
 ) <fig:environmental_field_noise>
 
 As shown in @fig:trajectory_tracking_noise, the trajectory reconstruction remains accurate across all levels of model uncertainty.
@@ -634,7 +634,7 @@ This reflects a trade-off between tracking accuracy and noise robustness, which 
 
 #figure(
   placement: none,
-  caption: [MPC parameter settings.],
+  caption: [MPC parameter settings for the free-running model test case],
   table(
     columns: 3,
     align: left,
@@ -663,24 +663,24 @@ This subsection presents the results of applying the proposed method to free-run
 The predictive model set is constructed using calm-water turning test data with a rudder angle of $-35$ degrees.
 The observed calm-water data are shown in @fig:observed_data_model.
 The MCMC method is applied to this dataset to identify the hydrodynamic maneuvering coefficients.
-The posterior distributions of the identified parameters are shown in @fig:posterior_model, and the calm-water simulation results using 50 model sets sampled from the posterior distribution are presented in @fig:calm_water_simulation_model.
+The posterior distributions of the identified hydrodynamic maneuvering coefficients are shown in @fig:posterior_model, and the calm-water simulation results using 50 model sets sampled from the posterior distribution are presented in @fig:calm_water_simulation_model.
 
 #figure(
   placement: none,
   image("figs/fig_12.svg", width: 100%),
-  caption: [Observed data in calm water.],
+  caption: [Observed calm-water turning data from the free-running model test],
 ) <fig:observed_data_model>
 
 #figure(
   placement: none,
   image("figs/fig_13.svg", width: 100%),
-  caption: [Prior and posterior distributions of hydrodynamic maneuvering coefficients.],
+  caption: [Prior and posterior distributions of the identified hydrodynamic maneuvering coefficients for the free-running model test],
 ) <fig:posterior_model>
 
 #figure(
   placement: none,
   image("figs/fig_14.svg", width: 100%),
-  caption: [Calm-water simulation with identified model parameters.],
+  caption: [Calm-water simulation results with the identified model parameters for the free-running model test],
 ) <fig:calm_water_simulation_model>
 
 Next, the proposed method is applied to the turning test data with a rudder angle of $-35$ degrees in regular waves using the constructed predictive model set, and the environmental field is reconstructed.
@@ -690,13 +690,13 @@ The trajectory reconstruction results are shown in @fig:trajectory_model, and th
 #figure(
   placement: none,
   image("figs/fig_15.svg", width: 100%),
-  caption: [Trajectory tracking result.],
+  caption: [Trajectory tracking results for the free-running model test],
 ) <fig:trajectory_model>
 
 #figure(
   placement: none,
   image("figs/fig_16.svg", width: 100%),
-  caption: [Environmental field result.],
+  caption: [Reconstructed environmental field for the free-running model test],
 ) <fig:environmental_field_model>
 
 As shown in @fig:trajectory_model, the trajectory of the model ship can be well reproduced even with experimental data by treating the external forces as control inputs.
@@ -707,7 +707,7 @@ In head-wave conditions, wave-induced forces dominantly affect the ship motion, 
 As a result, disturbance information is strongly reflected in the observed data, allowing the estimation to partially compensate for model inaccuracies and achieve reasonable environmental field reconstruction.
 
 On the other hand, as the turning motion progresses into beam and oblique wave conditions, the direction of the estimated external force vectors deviates from the positive $x$-axis, and the dispersion of the estimates increases.
-This behavior is not attributed to parameter estimation accuracy, but rather to inherent limitations in the model structure.
+This behavior is not attributed to hydrodynamic maneuvering coefficients estimation accuracy, but rather to inherent limitations in the model structure.
 
 The 3-DOF model used in this study does not account for roll motion, whereas in beam-wave conditions, roll-induced hydrodynamic effects significantly influence the ship motion.
 Consequently, the MPC attempts to compensate for these effects using only the in-plane components ($X, Y, N$), leading to estimated external forces that are not consistent with the actual wave direction.
