@@ -613,8 +613,31 @@ Therefore, the proposed method is capable of reconstructing key features of the 
 
 This section validates the proposed method using measured data obtained from free-running model tests.
 Unlike simulation data, the experimental data include measurement noise and unmodeled disturbances, and thus are used to evaluate the robustness and practical applicability of the proposed method under realistic operational conditions.
+The principal particulars of the model ship used in the free-running model test are summarized in @tab:model_ship.
+#figure(
+  placement: auto,
+  caption: [Principal particulars of the model ship used in the free-running model test],
+  table(
+    columns: 2,
+    stroke: none,
+    align: left,
+    table.hline(),
+    table.hline(),
+    [$L_"pp"$], [3.50 $[m]$], 
+    [$B$], [0.57 $[m]$], 
+    [$d$], [0.16 $[m]$], 
+    [$D_p$], [0.120 $[m]$],
+    [$H_R$], [0.130 $[m]$],
+    [$A_R$], [0.024 $[m^2]$],
+    table.hline()
+  ),
+  supplement: "Table",
+  kind: table,
+) <tab:model_ship>
 The model ship is a coastal container vessel, and turning test data with a rudder angle of $-35$ degrees in both calm water and regular waves are used.
-The wave direction is $180$ degrees, corresponding to the positive $x$-axis in the earth-fixed coordinate system.
+The wave height is set to $0.072 [m]$, and the wave period is $3.753 [s]$, corresponding to the wave conditions in the model test.
+The wave direction is 180 degrees, meaning that waves propagate in the positive x-direction in the earth-fixed coordinate system.
+This free-running model ship test data is maintained by MTI Co., Ltd.
 
 === Parameter Settings of the Proposed Method
 
