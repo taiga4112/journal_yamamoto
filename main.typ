@@ -736,7 +736,7 @@ These results demonstrate that the proposed method can successfully infer extern
 The resultant force magnitude and direction derived from the estimated environmental field (@fig:force_magnitude_direction_model), together with their spatial distribution (@fig:environmental_field_model), provide insight into the validity and limitations of the reconstructed environmental field.
 The MPC-based estimation results and the representative values exhibit consistent trends, indicating that the proposed method can robustly capture the temporal evolution of external forces despite model uncertainty.
 
-In particular, the magnitude of the resultant force is reasonably reproduced, suggesting that the overall intensity of environmental disturbances acting on the ship is successfully inferred from the observational data.
+In particular, the magnitude of the resultant force is well reproduced, suggesting that the overall intensity of environmental disturbances acting on the ship is successfully inferred from the observational data.
 
 In particular, under head-wave conditions, the reconstructed environmental field (@fig:environmental_field_model) shows that the estimated force vectors are generally aligned with the wave propagation direction, while the corresponding force magnitude (@fig:force_magnitude_direction_model) is reasonably reproduced.
 
@@ -759,7 +759,7 @@ From validation using both simulation data and free-running model test data, the
 
 - Application to free-running model test data demonstrated that the proposed method can reconstruct a physically reasonable environmental field from experimental data under disturbance-dominant conditions such as head waves. In contrast, under beam and following wave conditions, the estimation accuracy decreases due to limitations in the model structure associated with neglecting roll motion, highlighting the need for model extension.
 
-These results demonstrate that the proposed framework provides a practical and robust approach for reconstructing the spatial characteristics of disturbances acting on a ship under realistic conditions with model uncertainty and observational noise.
+These results demonstrate that the proposed framework provides a practical and physically interpretable approach for reconstructing the spatial characteristics of disturbances acting on a ship under realistic conditions with model uncertainty and observational noise.
 
 Future work includes extending the model to higher degrees of freedom incorporating roll motion and improving model generalization by using diverse maneuvering data for model identification, thereby enhancing the applicability of the framework to a wider range of sea conditions.
 
