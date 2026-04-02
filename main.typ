@@ -712,7 +712,7 @@ The trajectory reconstruction results are shown in @fig:trajectory_model, and th
 
 #figure(
   placement: none,
-  image("figs/fig_15.svg", width: 100%),
+  image("figs/fig_15.png", width: 100%),
   caption: [Trajectory tracking results for the free-running model test],
 ) <fig:trajectory_model>
 
@@ -722,23 +722,28 @@ The trajectory reconstruction results are shown in @fig:trajectory_model, and th
   caption: [Reconstructed environmental field for the free-running model test],
 ) <fig:environmental_field_model>
 
-As shown in @fig:trajectory_model, the trajectory of the model ship can be well reproduced even with experimental data by treating the external forces as control inputs.
-In contrast, the reconstructed environmental fields exhibit characteristic differences depending on the wave conditions.
+#figure(
+  placement: none,
+  image("figs/fig_17.png", width: 100%),
+  caption: [Force magnitude and direction of the reconstructed environmental field],
+) <fig:force_magnitude_direction_model>
 
-Under head-wave conditions in the early stage of the turning motion, the estimated representative external force vectors are generally aligned with the wave propagation direction (positive $x$-axis), indicating that both the direction and magnitude of the environmental field are reasonably captured.
-In head-wave conditions, wave-induced forces dominantly affect the ship motion, and motion changes such as deceleration are clearly observed.
-As a result, disturbance information is strongly reflected in the observed data, allowing the estimation to partially compensate for model inaccuracies and achieve reasonable environmental field reconstruction.
+As shown in @fig:trajectory_model, the trajectory of the model ship can be accurately reproduced by the MPC-based estimation, in which external forces are treated as control inputs.
+More importantly, when the representative external forces estimated from the multi-model framework are applied to each predictive model, the resulting forward simulations also reproduce the observed trajectory with good agreement.
+This indicates that the estimated external forces are not merely compensating inputs for trajectory fitting, but capture physically consistent environmental effects that generalize across models with uncertainty.
+These results demonstrate that the proposed method can successfully infer external forces that bridge the gap between uncertain maneuvering models and actual ship motion, and that the representative external forces enable robust trajectory reconstruction under model uncertainty.
 
-On the other hand, as the turning motion progresses into beam and oblique wave conditions, the direction of the estimated external force vectors deviates from the positive $x$-axis, and the dispersion of the estimates increases.
-This behavior is not attributed to hydrodynamic maneuvering coefficients estimation accuracy, but rather to inherent limitations in the model structure.
+The resultant force magnitude and direction derived from the estimated environmental field (@fig:force_magnitude_direction_model), together with their spatial distribution (@fig:environmental_field_model), provide insight into the validity and limitations of the reconstructed environmental field.
+The MPC-based estimation results and the representative values exhibit consistent trends, indicating that the proposed method can robustly capture the temporal evolution of external forces despite model uncertainty.
 
-The 3-DOF model used in this study does not account for roll motion, whereas in beam-wave conditions, roll-induced hydrodynamic effects significantly influence the ship motion.
-Consequently, the MPC attempts to compensate for these effects using only the in-plane components ($X, Y, N$), leading to estimated external forces that are not consistent with the actual wave direction.
+In particular, the magnitude of the resultant force is reasonably reproduced, suggesting that the overall intensity of environmental disturbances acting on the ship is successfully inferred from the observational data.
 
-These results indicate that the proposed method can reconstruct a reasonable environmental field from experimental data when disturbances are dominant, while the estimation accuracy is limited when the model structure cannot adequately represent the disturbance response.
-This highlights both the practical effectiveness and the inherent limitations of the proposed framework under realistic conditions.
+In particular, under head-wave conditions, the reconstructed environmental field (@fig:environmental_field_model) shows that the estimated force vectors are generally aligned with the wave propagation direction, while the corresponding force magnitude (@fig:force_magnitude_direction_model) is reasonably reproduced.
 
-Therefore, to extend the applicability of the method to more general sea conditions, it is important to enhance the model representation capability, for example by extending the model to higher degrees of freedom including roll motion.
+On the other hand, discrepancies are observed in the force direction, especially under wave conditions.
+This limitation is attributed to the structural assumptions of the predictive model. Since the present framework is based on a 3-DOF maneuvering model that neglects roll motion, the influence of wave-induced roll and associated hydrodynamic effects cannot be explicitly represented.
+
+As a result, the estimated in-plane force components (X, Y, N) partially compensate for these unmodeled dynamics, leading to deviations in the inferred force direction. This highlights that while the proposed method effectively reconstructs the dominant characteristics of environmental disturbances, its directional accuracy is inherently constrained by the model structure.
 
 
 = Conclusion
