@@ -1,19 +1,61 @@
-# jasnaoe_template_typst
+# journal_yamamoto
 
-このテンプレートは，2024年秋季以降の日本船舶海洋工学会の講演会論文作成を想定して，[Typst](https://typst.app)で作成しています．
+船舶操縦における環境場逆推定に関する論文原稿を、Typstで管理するためのリポジトリです。
 
-もちろん♡非公式♡のテンプレートですので，ご使用の際は自己責任でお願いします．
+## 概要
 
-このテンプレートを使ったPDFファイルの仕上がりは，[GitHub PagesのPDFファイル](https://taiga4112.github.io/jasnaoe_template_typst/main.pdf)をご確認ください．
+- 英語原稿: main.typ
+- 日本語原稿: main_ja.typ
+- 論文メタ情報（タイトル・著者・要旨）: paper_info.yaml
+- 参考文献データ: references.bib
+- 図: figs/
+- スタイル・補助ライブラリ: libs/jasnaoe-conf/
 
-> **注意**
->
-> 2024年秋季講演会から[講演論文のテンプレートが大幅に変更]("https://www.jasnaoe.or.jp/lecture/2024aut/thesis.html?id=yoryo")されました．
->
-> 具体的には，論文タイトル，著者情報，キーワード，要旨は講演論文投稿システムで別に作成し，本文のみを記載したファイルを講演論文投稿システムに投稿することで，システム側でマージして完成するようになりました．
->
-> そのため，このテンプレートは，2024年秋季講演会から変更されたフォーマットに沿って，本文情報のみを記載することを想定しています。論文タイトル，著者情報，キーワード，要旨はこのテンプレートでは記載することを想定していません．
+## 必要環境
 
-## How to Use
+- Typst（CLI）
 
-[Wiki](https://github.com/taiga4112/jasnaoe_template_typst/wiki)にて使い方の詳細を記載していますので、そちらをご覧ください。
+インストール例:
+
+- macOS: brew install typst
+
+## ビルド方法
+
+### 英語版PDFを生成
+
+typst compile main.typ main.pdf
+
+### 日本語版PDFを生成
+
+typst compile main_ja.typ main_ja.pdf
+
+### 編集しながらプレビュー
+
+typst watch main.typ main.pdf
+
+必要に応じて main_ja.typ に置き換えてください。
+
+## 使い方のメモ
+
+- 著者情報や要旨は paper_info.yaml を編集します。
+- 本文は main.typ または main_ja.typ を編集します。
+- 文献は references.bib に追加し、本文内で引用キーを参照します。
+
+## ディレクトリ構成
+
+.
+├── main.typ
+├── main_ja.typ
+├── paper_info.yaml
+├── references.bib
+├── figs/
+└── libs/
+	└── jasnaoe-conf/
+		├── direct_bib_lib.typ
+		├── jasnaoe-conf_lib.typ
+		└── jasnaoe-reference.csl
+
+## 注意事項
+
+- コンパイルには Typst のバージョン差異による挙動差が生じる場合があります。
+- フォントや環境依存で見た目が変わる場合は、ローカル環境のフォント設定を確認してください。
